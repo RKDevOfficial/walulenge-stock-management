@@ -1,0 +1,116 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Stock Out | Walulenge{% endblock %}
+{% block page_heading %}Stock Out{% endblock %}
+
+{% block content %}
+
+<div class="welcome-section">
+    <div>
+        <h3>Stock Out</h3>
+        <p>Record damaged stock and authorised stock removals.</p>
+    </div>
+
+    <a href="{% url 'stock_list' %}" class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Back to Stock
+    </a>
+</div>
+
+<div class="dashboard-panel">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+                <label class="form-label">Shop and Product *</label>
+                <select name="stock" class="form-select" required>
+                    <option value="">Select stock record</option>
+                    {% for stock in stocks %}
+                        <option value="{{ stock.id }}">
+                            {{ stock.shop.name }} - {{ stock.product.name }}
+                            (Available: {{ stock.quantity }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Transaction Type *</label>
+                <select name="transaction_type" class="form-select" required>
+                    <option value="">Select transaction type</option>
+                    <option value="DAMAGE">Damaged Stock</option>
+                    <option value="ADJUSTMENT">Adjustment</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Quantity to Remove *</label>
+                <input
+                    type="number"
+                    name="quantity"
+                    class="form-control"
+                    min="1"
+                    required
+                >
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Unit Cost (UGX)</label>
+                <input
+                    type="number"
+                    name="unit_cost"
+                    class="form-control"
+                    min="0"
+                    step="0.01"
+                    value="0.00"
+                >
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Reference Number</label>
+                <input
+                    type="text"
+                    name="reference"
+                    class="form-control"
+                    placeholder="e.g. DAMAGE-2026-001"
+                >
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Reason / Notes *</label>
+                <textarea
+                    name="notes"
+                    class="form-control"
+                    rows="3"
+                    required
+                    placeholder="Explain why the stock is being removed..."
+                ></textarea>
+            </div>
+
+        </div>
+
+        <hr class="my-4">
+
+        <button type="submit" class="btn btn-danger">
+            <i class="fa-solid fa-minus"></i> Record Stock Out
+        </button>
+
+        <a href="{% url 'stock_list' %}" class="btn btn-outline-secondary">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

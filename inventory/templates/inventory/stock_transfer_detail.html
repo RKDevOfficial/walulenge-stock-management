@@ -1,0 +1,207 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Stock Transfer #{{ transfer.id }} | Walulenge{% endblock %}
+{% block page_heading %}Stock Transfer Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-1">Stock Transfer #{{ transfer.id }}</h3>
+            <p class="text-muted mb-0">
+                Transfer from {{ transfer.source_shop.name }}
+                to {{ transfer.destination_shop.name }}
+            </p>
+        </div>
+
+        <a href="{% url 'stock_transfer_list' %}"
+           class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Transfers
+        </a>
+    </div>
+
+    <div class="dashboard-panel mb-4">
+        <div class="panel-header">
+            <h5 class="mb-0">Transfer Information</h5>
+        </div>
+
+        <div class="p-4">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <small class="text-muted">Source Shop</small>
+                    <h6>{{ transfer.source_shop.name }}</h6>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">Destination Shop</small>
+                    <h6>{{ transfer.destination_shop.name }}</h6>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">Transfer Status</small>
+                    <div>
+                        {% if transfer.status == 'RECEIVED' %}
+                            <span class="badge bg-success">Received</span>
+                        {% elif transfer.status == 'SENT' %}
+                            <span class="badge bg-info text-dark">Sent</span>
+                        {% elif transfer.status == 'CANCELLED' %}
+                            <span class="badge bg-danger">Cancelled</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Draft</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">Initiated By</small>
+                    <h6>{{ transfer.initiated_by.username }}</h6>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">Date Created</small>
+                    <h6>{{ transfer.date_created|date:"d M Y, H:i" }}</h6>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">Date Sent</small>
+                    <h6>
+                        {% if transfer.date_sent %}
+                            {{ transfer.date_sent|date:"d M Y, H:i" }}
+                        {% else %}
+                            Not sent
+                        {% endif %}
+                    </h6>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">Date Received</small>
+                    <h6>
+                        {% if transfer.date_received %}
+                            {{ transfer.date_received|date:"d M Y, H:i" }}
+                        {% else %}
+                            Not received
+                        {% endif %}
+                    </h6>
+                </div>
+
+                <div class="col-12">
+                    <small class="text-muted">Transfer Notes</small>
+                    <p class="mb-0">{{ transfer.notes|default:"No notes provided." }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-panel mb-4">
+        <div class="panel-header">
+            <h5 class="mb-0">Products in This Transfer</h5>
+        </div>
+
+        <div class="p-3">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Product</th>
+                            <th>Product Code</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in items %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.product.product_code }}</td>
+                                <td>{{ item.quantity }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    No products have been added to this transfer.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-panel">
+        <div class="panel-header">
+            <h5 class="mb-0">Transfer Actions</h5>
+        </div>
+
+        <div class="p-4">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {% if transfer.status == 'DRAFT' %}
+                <p class="text-muted">
+                    This transfer is still a draft. Sending it will deduct
+                    the listed quantities from {{ transfer.source_shop.name }}.
+                </p>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <form method="POST" action="{% url 'stock_transfer_send' transfer.pk %}"
+                          onsubmit="return confirm('Send this transfer? Stock will be deducted from the source shop.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Send Transfer
+                        </button>
+                    </form>
+
+                    <form method="POST" action="{% url 'stock_transfer_cancel' transfer.pk %}"
+                          onsubmit="return confirm('Cancel this draft transfer?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="fas fa-times me-2"></i>Cancel Transfer
+                        </button>
+                    </form>
+                </div>
+            {% elif transfer.status == 'SENT' %}
+                <p class="text-muted">
+                    This transfer has been sent. Confirm receipt to add
+                    the transferred quantities to {{ transfer.destination_shop.name }}.
+                </p>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <form method="POST" action="{% url 'stock_transfer_receive' transfer.pk %}"
+                          onsubmit="return confirm('Confirm that all products have arrived at the destination shop?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check me-2"></i>Receive Transfer
+                        </button>
+                    </form>
+
+                    <form method="POST" action="{% url 'stock_transfer_cancel' transfer.pk %}"
+                          onsubmit="return confirm('Cancel this sent transfer? The original stock deduction will be reversed.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="fas fa-times me-2"></i>Cancel and Reverse
+                        </button>
+                    </form>
+                </div>
+            {% elif transfer.status == 'RECEIVED' %}
+                <span class="text-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    This transfer has been successfully received.
+                </span>
+            {% elif transfer.status == 'CANCELLED' %}
+                <span class="text-danger">
+                    <i class="fas fa-ban me-2"></i>
+                    This transfer has been cancelled.
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

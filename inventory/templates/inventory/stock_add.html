@@ -1,0 +1,123 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Add Stock | Walulenge{% endblock %}
+{% block page_heading %}Add Stock{% endblock %}
+
+{% block content %}
+
+<div class="welcome-section">
+    <div>
+        <h3>Stock In</h3>
+        <p>Record purchases, returns and stock adjustments.</p>
+    </div>
+
+    <a href="{% url 'stock_list' %}" class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Back to Stock
+    </a>
+</div>
+
+<div class="dashboard-panel">
+
+    <div class="panel-header">
+        <div>
+            <h5>Stock Entry Details</h5>
+            <small>Complete the information below</small>
+        </div>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+                <label class="form-label">Shop and Product *</label>
+                <select name="stock" class="form-select" required>
+                    <option value="">Select stock record</option>
+                    {% for stock in stocks %}
+                        <option value="{{ stock.id }}">
+                            {{ stock.shop.name }} - {{ stock.product.name }}
+                            (Current: {{ stock.quantity }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Transaction Type *</label>
+                <select name="transaction_type" class="form-select" required>
+                    <option value="">Select transaction type</option>
+                    <option value="PURCHASE">Purchase</option>
+                    <option value="RETURN">Return</option>
+                    <option value="ADJUSTMENT">Adjustment</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Quantity *</label>
+                <input
+                    type="number"
+                    name="quantity"
+                    class="form-control"
+                    min="1"
+                    required
+                >
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Unit Cost (UGX)</label>
+                <input
+                    type="number"
+                    name="unit_cost"
+                    class="form-control"
+                    min="0"
+                    step="0.01"
+                    value="0.00"
+                >
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Reference Number</label>
+                <input
+                    type="text"
+                    name="reference"
+                    class="form-control"
+                    placeholder="e.g. Purchase invoice number"
+                >
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Notes</label>
+                <textarea
+                    name="notes"
+                    class="form-control"
+                    rows="3"
+                    placeholder="Enter additional information..."
+                ></textarea>
+            </div>
+
+        </div>
+
+        <hr class="my-4">
+
+        <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Record Stock In
+        </button>
+
+        <a href="{% url 'stock_list' %}" class="btn btn-outline-secondary">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+{% endblock %}

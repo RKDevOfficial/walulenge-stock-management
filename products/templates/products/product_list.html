@@ -1,0 +1,157 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Product Management | Walulenge{% endblock %}
+{% block page_heading %}Product Management{% endblock %}
+
+{% block content %}
+
+<div class="welcome-section">
+    <div>
+        <h3>Product Management</h3>
+        <p>View and manage bicycle and spare-parts products.</p>
+    </div>
+</div>
+
+<div class="dashboard-stats">
+
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+        <div>
+            <p>Total Products</p>
+            <h3>{{ total_products }}</h3>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon green">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div>
+            <p>Available Products</p>
+            <h3>{{ available_products }}</h3>
+        </div>
+    </div>
+
+</div>
+
+<div class="dashboard-panel">
+
+    <div class="panel-header">
+        <div>
+            <h5>Product Catalogue</h5>
+            <small>Search and manage registered products</small>
+        </div>
+        <a href="{% url 'product_create' %}" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Add Product
+        </a>
+    </div>
+
+    <form method="GET" class="row g-2 mb-4">
+        <div class="col-md-8">
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                placeholder="Search by product name, code or category..."
+                value="{{ search_query }}"
+            >
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fa-solid fa-search"></i> Search
+            </button>
+        </div>
+
+        <div class="col-md-2">
+            <a href="{% url 'product_list' %}" class="btn btn-outline-secondary w-100">
+                Reset
+            </a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product</th>
+                    <th>Code</th>
+                    <th>Category</th>
+                    <th>Buying Price</th>
+                    <th>Retail Price</th>
+                    <th>Wholesale Price</th>
+                    <th>Suppliers</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for product in products %}
+                    <tr>
+                        <td>
+                            {% if product.image %}
+                                <img
+                                    src="{{ product.image.url }}"
+                                    alt="{{ product.name }}"
+                                    width="45"
+                                    height="45"
+                                    style="object-fit: cover; border-radius: 6px;"
+                                >
+                            {% else %}
+                                <i class="fa-solid fa-box text-secondary"></i>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.product_code }}</td>
+                        <td>{{ product.category.name }}</td>
+                        <td>UGX {{ product.buying_price|floatformat:0 }}</td>
+                        <td>UGX {{ product.retail_price|floatformat:0 }}</td>
+                        <td>UGX {{ product.wholesale_price|floatformat:0 }}</td>
+
+                        <td>
+                            {% for supplier in product.suppliers.all %}
+                                <span>{{ supplier.name }}</span>{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                <span class="text-muted">None</span>
+                            {% endfor %}
+                        </td>
+
+                        <td>
+                            {% if product.is_available %}
+                                <span class="badge bg-success">Available</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Unavailable</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'product_update' product.id %}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </a>
+                            <a href="{% url 'product_delete' product.id %}"
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center py-4">
+                            No products found.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

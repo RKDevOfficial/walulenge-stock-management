@@ -1,0 +1,185 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Customer Dashboard | Walulenge Asuman & Sons{% endblock %}
+
+{% block page_heading %}Customer Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="welcome-section">
+    <div>
+        <h3>Welcome back, {{ request.user.first_name|default:request.user.username }}!</h3>
+        <p>Manage your purchases and explore our bicycle products.</p>
+    </div>
+
+    <a href="#" class="shop-now-btn">
+        <i class="fa-solid fa-cart-shopping"></i>
+        Shop Now
+    </a>
+</div>
+
+<div class="dashboard-stats">
+
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <i class="fa-solid fa-bag-shopping"></i>
+        </div>
+        <div>
+            <p>Total Orders</p>
+            <h3>0</h3>
+            <small>All your purchases</small>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon orange">
+            <i class="fa-solid fa-clock"></i>
+        </div>
+        <div>
+            <p>Pending Orders</p>
+            <h3>0</h3>
+            <small>Orders awaiting completion</small>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon green">
+            <i class="fa-solid fa-wallet"></i>
+        </div>
+        <div>
+            <p>Outstanding Balance</p>
+            <h3>UGX 0</h3>
+            <small>Your unpaid balance</small>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon purple">
+            <i class="fa-solid fa-check-circle"></i>
+        </div>
+        <div>
+            <p>Completed Orders</p>
+            <h3>0</h3>
+            <small>Successfully completed</small>
+        </div>
+    </div>
+
+</div>
+
+<div class="dashboard-grid">
+
+    <section class="dashboard-panel orders-panel">
+
+        <div class="panel-header">
+            <div>
+                <h5>Recent Orders</h5>
+                <p>Your latest purchases</p>
+            </div>
+
+            <a href="#" class="view-all-link">View All</a>
+        </div>
+
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+
+            <h6>No Orders Yet</h6>
+            <p>Your recent purchases will appear here.</p>
+
+            <a href="#" class="shop-now-btn">
+                Explore Products
+            </a>
+        </div>
+
+    </section>
+
+    <section class="dashboard-panel account-panel">
+
+        <div class="panel-header">
+            <div>
+                <h5>My Account</h5>
+                <p>Your account information</p>
+            </div>
+
+            <i class="fa-solid fa-user-circle account-heading-icon"></i>
+        </div>
+
+        <div class="account-details">
+
+            <div class="account-detail">
+                <span>Full Name</span>
+                <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+            </div>
+
+            <div class="account-detail">
+                <span>Username</span>
+                <strong>{{ request.user.username }}</strong>
+            </div>
+
+            <div class="account-detail">
+                <span>Email Address</span>
+                <strong>{{ request.user.email|default:"Not provided" }}</strong>
+            </div>
+
+            <div class="account-detail">
+                <span>Phone Number</span>
+                <strong>{{ request.user.phone_number|default:"Not provided" }}</strong>
+            </div>
+
+            <div class="account-detail">
+                <span>Account Type</span>
+                <strong>{{ request.user.get_role_display }}</strong>
+            </div>
+
+        </div>
+
+        <a href="#" class="account-action">
+            Manage Account
+            <i class="fa-solid fa-arrow-right"></i>
+        </a>
+
+    </section>
+
+</div>
+
+<section class="dashboard-panel quick-shop-panel">
+
+    <div class="panel-header">
+        <div>
+            <h5>Quick Shopping</h5>
+            <p>Find the products you need</p>
+        </div>
+    </div>
+
+    <div class="quick-shop-grid">
+
+        <div class="quick-shop-item">
+            <div class="quick-shop-icon">
+                <i class="fa-solid fa-bicycle"></i>
+            </div>
+            <h6>Bicycles</h6>
+            <p>Explore available bicycles.</p>
+        </div>
+
+        <div class="quick-shop-item">
+            <div class="quick-shop-icon">
+                <i class="fa-solid fa-gears"></i>
+            </div>
+            <h6>Spare Parts</h6>
+            <p>Find bicycle spare parts.</p>
+        </div>
+
+        <div class="quick-shop-item">
+            <div class="quick-shop-icon">
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+            </div>
+            <h6>Accessories</h6>
+            <p>Explore bicycle accessories.</p>
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,226 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Stock Management | Walulenge{% endblock %}
+{% block page_heading %}Stock Management{% endblock %}
+
+{% block content %}
+
+<div class="welcome-section">
+    <div>
+        <h3>Stock Overview</h3>
+        <p>Monitor bicycle and spare-parts stock across your shops.</p>
+    </div>
+</div>
+
+<div class="dashboard-stats">
+
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+        <div>
+            <p>Stock Records</p>
+            <h3>{{ total_stock_records }}</h3>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon orange">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+            <p>Low Stock</p>
+            <h3>{{ low_stock_count }}</h3>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon purple">
+            <i class="fa-solid fa-box-open"></i>
+        </div>
+        <div>
+            <p>Out of Stock</p>
+            <h3>{{ out_of_stock_count }}</h3>
+        </div>
+    </div>
+
+</div>
+
+<div class="dashboard-panel">
+
+    <div class="panel-header">
+        <div>
+            <h5>Shop Stock Records</h5>
+            <small>View quantities and reorder levels</small>
+        </div>
+        <a href="{% url 'stock_add' %}" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Stock In
+        </a>
+        <a href="{% url 'stock_remove' %}" class="btn btn-outline-danger">
+            <i class="fa-solid fa-minus"></i> Stock Out
+        </a>
+        <a href="{% url 'stock_transactions' %}" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-clock-rotate-left"></i> History
+        </a>
+    </div>
+
+    <form method="GET" class="row g-2 mb-4">
+
+        <div class="col-md-4">
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                placeholder="Search product name, code or category..."
+                value="{{ search_query }}"
+            >
+        </div>
+
+        <div class="col-md-3">
+            <select name="shop" class="form-select">
+                <option value="">All Assigned Shops</option>
+
+                {% for shop in shops %}
+                    <option
+                        value="{{ shop.id }}"
+                        {% if selected_shop == shop.id|stringformat:"s" %}selected{% endif %}
+                    >
+                        {{ shop.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <select name="status" class="form-select">
+                <option value="">All Stock Statuses</option>
+                <option value="low" {% if selected_status == 'low' %}selected{% endif %}>
+                    Low Stock
+                </option>
+                <option value="out" {% if selected_status == 'out' %}selected{% endif %}>
+                    Out of Stock
+                </option>
+                <option value="available" {% if selected_status == 'available' %}selected{% endif %}>
+                    In Stock
+                </option>
+            </select>
+        </div>
+
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fa-solid fa-search"></i> Filter
+            </button>
+            <a href="{% url 'stock_list' %}"
+               class="btn btn-outline-secondary">
+                Reset
+            </a>
+        </div>
+
+    </form>
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle">
+
+            <thead>
+                <tr>
+                    <th>Shop</th>
+                    <th>Product</th>
+                    <th>Product Code</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Reorder Level</th>
+                    <th>Last Updated</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for stock in stocks %}
+
+                    <tr>
+                        <td>{{ stock.shop.name }}</td>
+
+                        <td>{{ stock.product.name }}</td>
+
+                        <td>{{ stock.product.product_code }}</td>
+
+                        <td>{{ stock.product.category.name }}</td>
+
+                        <td>
+                            <strong>{{ stock.quantity }}</strong>
+                        </td>
+
+                        <td>{{ stock.reorder_level }}</td>
+
+                        <td>{{ stock.last_updated|date:"d M Y, H:i" }}</td>
+
+                        <td>
+                            {% if stock.quantity == 0 %}
+                                <span class="badge bg-danger">Out of Stock</span>
+                            {% elif stock.quantity <= stock.reorder_level %}
+                                <span class="badge bg-warning text-dark">Low Stock</span>
+                            {% else %}
+                                <span class="badge bg-success">In Stock</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            No stock records found.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% if page_obj.has_other_pages %}
+        <nav class="mt-4" aria-label="Stock pagination">
+            <ul class="pagination justify-content-end">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?page={{ page_obj.previous_page_number }}&amp;search={{ search_query|urlencode }}&amp;shop={{ selected_shop }}&amp;status={{ selected_status }}">
+                            Previous
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?page={{ page_obj.next_page_number }}&amp;search={{ search_query|urlencode }}&amp;shop={{ selected_shop }}&amp;status={{ selected_status }}">
+                            Next
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+</div>
+
+{% endblock %}

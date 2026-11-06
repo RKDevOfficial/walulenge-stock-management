@@ -1,0 +1,150 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Create Stock Transfer | Walulenge{% endblock %}
+{% block page_heading %}Create Stock Transfer{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <h3 class="mb-1">Create Stock Transfer</h3>
+        <p class="text-muted mb-0">Move products from one shop to another.</p>
+    </div>
+
+    <div class="dashboard-panel">
+        <div class="panel-header">
+            <h5 class="mb-0">Transfer Information</h5>
+        </div>
+
+        <div class="p-4">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Source Shop</label>
+                        <select name="source_shop" class="form-select" required>
+                            <option value="">Select source shop</option>
+                            {% for shop in shops %}
+                                <option value="{{ shop.id }}">{{ shop.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Destination Shop</label>
+                        <select name="destination_shop" class="form-select" required>
+                            <option value="">Select destination shop</option>
+                            {% for shop in shops %}
+                                <option value="{{ shop.id }}">{{ shop.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>Products to Transfer</h5>
+                    <button type="button" id="add-product" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i>Add Another Product
+                    </button>
+                </div>
+
+                <div id="product-rows">
+                    <div class="row g-2 mb-3 product-row">
+                        <div class="col-md-8">
+                            <label class="form-label">Product</label>
+                            <select name="product_ids" class="form-select" required>
+                                <option value="">Select product</option>
+                                {% for product in products %}
+                                    <option value="{{ product.id }}">
+                                        {{ product.name }} ({{ product.product_code }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Quantity</label>
+                            <input
+                                type="number"
+                                name="quantities"
+                                class="form-control"
+                                min="1"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-danger remove-product" disabled>
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Transfer Notes</label>
+                    <textarea
+                        name="notes"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Optional transfer notes..."
+                    ></textarea>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Create Draft
+                    </button>
+                    <a href="{% url 'stock_transfer_list' %}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const productRows = document.getElementById('product-rows');
+    const addButton = document.getElementById('add-product');
+
+    addButton.addEventListener('click', function () {
+        const firstRow = productRows.querySelector('.product-row');
+        const newRow = firstRow.cloneNode(true);
+
+        newRow.querySelector('select').selectedIndex = 0;
+        newRow.querySelector('input').value = '';
+        newRow.querySelector('.remove-product').disabled = false;
+
+        productRows.appendChild(newRow);
+        updateRemoveButtons();
+    });
+
+    productRows.addEventListener('click', function (event) {
+        const removeButton = event.target.closest('.remove-product');
+
+        if (removeButton && productRows.querySelectorAll('.product-row').length > 1) {
+            removeButton.closest('.product-row').remove();
+            updateRemoveButtons();
+        }
+    });
+
+    function updateRemoveButtons() {
+        const rows = productRows.querySelectorAll('.product-row');
+
+        rows.forEach(function (row) {
+            row.querySelector('.remove-product').disabled = rows.length === 1;
+        });
+    }
+});
+</script>
+{% endblock %}

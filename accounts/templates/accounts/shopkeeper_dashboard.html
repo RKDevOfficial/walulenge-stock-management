@@ -1,0 +1,9 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Shopkeeper Dashboard | Walulenge{% endblock %}
+
+{% block content %}
+<h3>Shopkeeper Dashboard</h3>
+<p>Welcome, {{ request.user.username }}.</p>
+<p>Manage sales, customers, discounts and receipts.</p>
+{% endblock %}

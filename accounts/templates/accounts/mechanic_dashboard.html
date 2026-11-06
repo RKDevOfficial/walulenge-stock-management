@@ -1,0 +1,9 @@
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Mechanic Dashboard | Walulenge{% endblock %}
+
+{% block content %}
+<h3>Mechanic Dashboard</h3>
+<p>Welcome, {{ request.user.username }}.</p>
+<p>View products issued to you and their status.</p>
+{% endblock %}

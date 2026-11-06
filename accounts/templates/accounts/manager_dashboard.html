@@ -1,0 +1,199 @@
+
+{% extends 'accounts/base_dashboard.html' %}
+
+{% block title %}Manager Dashboard | Walulenge{% endblock %}
+
+{% block page_heading %}Manager Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="welcome-section">
+    <div>
+        <h3>Welcome, {{ request.user.get_full_name|default:request.user.username }}!</h3>
+        <p>Here is an overview of your business operations.</p>
+    </div>
+</div>
+
+<div class="dashboard-stats">
+
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+        <div>
+            <p>Total Products</p>
+            <h3>{{ total_products }}</h3>
+            <small>{{ available_products }} available</small>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon green">
+            <i class="fa-solid fa-warehouse"></i>
+        </div>
+        <div>
+            <p>Total Stock Units</p>
+            <h3>{{ total_stock_units }}</h3>
+            <small>Across all shops</small>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon orange">
+            <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+        <div>
+            <p>Today's Sales</p>
+            <h3>UGX {{ today_sales|floatformat:0 }}</h3>
+            <small>Including bicycles and frames</small>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon purple">
+            <i class="fa-solid fa-money-bill-transfer"></i>
+        </div>
+        <div>
+            <p>Today's Collections</p>
+            <h3>UGX {{ today_collections|floatformat:0 }}</h3>
+            <small>Recorded payments</small>
+        </div>
+    </div>
+
+</div>
+
+<div class="dashboard-stats">
+
+    <div class="stat-card">
+        <div class="stat-icon orange">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+            <p>Low Stock Records</p>
+            <h3>{{ low_stock_count }}</h3>
+            <small>Items requiring attention</small>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon purple">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+        </div>
+        <div>
+            <p>Outstanding Debt</p>
+            <h3>UGX {{ total_debt|floatformat:0 }}</h3>
+            <small>Customer balances</small>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon blue">
+            <i class="fa-solid fa-user-lock"></i>
+        </div>
+        <div>
+            <p>Blocked Customers</p>
+            <h3>{{ blocked_customers }}</h3>
+            <small>Accounts restricted</small>
+        </div>
+    </div>
+
+</div>
+
+<div class="dashboard-grid">
+
+    <div class="dashboard-panel">
+        <div class="panel-header">
+            <div>
+                <h5>Recent Sales</h5>
+                <small>Latest five sales transactions</small>
+            </div>
+        </div>
+
+        {% if recent_sales %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Receipt</th>
+                            <th>Shop</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in recent_sales %}
+                            <tr>
+                                <td>{{ sale.receipt_number }}</td>
+                                <td>{{ sale.shop.name }}</td>
+                                <td>
+                                    {% if sale.customer %}
+                                        {{ sale.customer.get_full_name|default:sale.customer.username }}
+                                    {% else %}
+                                        Walk-in
+                                    {% endif %}
+                                </td>
+                                <td>UGX {{ sale.total_amount|floatformat:0 }}</td>
+                                <td>{{ sale.get_payment_status_display }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <p>No sales recorded yet.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="dashboard-panel">
+        <div class="panel-header">
+            <div>
+                <h5>Recent Stock Activity</h5>
+                <small>Latest five stock transactions</small>
+            </div>
+        </div>
+
+        {% if recent_transactions %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Shop</th>
+                            <th>Type</th>
+                            <th>Direction</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in recent_transactions %}
+                            <tr>
+                                <td>{{ transaction.stock.product.name }}</td>
+                                <td>{{ transaction.stock.shop.name }}</td>
+                                <td>{{ transaction.get_transaction_type_display }}</td>
+                                <td>{{ transaction.get_direction_display }}</td>
+                                <td>{{ transaction.quantity }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <p>No stock transactions recorded yet.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}
+
